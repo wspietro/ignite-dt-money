@@ -32,6 +32,7 @@ export function SearchForm() {
       <input
         type="text"
         placeholder="Busque por transações"
+        required
         {...register('query')}
       />
 
