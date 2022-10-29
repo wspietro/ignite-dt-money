@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
+import { api } from "../lib/axios";
 
 interface Transaction {
   id: number;
@@ -28,16 +29,22 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     // Receberemos uma query de busca opcional após expor a função no contexto;
     // Dessa forma, será possível filtrar as transações com a query.
 
-    const url = new URL('http://localhost:3333/transactions');
+    // const url = new URL('http://localhost:3333/transactions');
 
-    if (query) {
-      url.searchParams.append('q', query)
-    }
+    // if (query) {
+    //   url.searchParams.append('q', query)
+    // }
 
-    const response = await fetch(url);
-    const data = await response.json();
+    // const response = await fetch(url);
+    // const data = await response.json();
 
-    setTransactions(data);
+    const response = await api.get('transactions', {
+      params: {
+        q: query,
+      }
+    })
+
+    setTransactions(response.data);
   };
 
   // useEffect não aceita async/await https://www.designcise.com/web/tutorial/why-cant-react-useeffect-callback-be-async
