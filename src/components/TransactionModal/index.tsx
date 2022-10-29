@@ -10,6 +10,7 @@ import {
 } from './styles';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod'
+import { api } from '../../lib/axios';
 
 
 const newTransactionFormSchema = z.object({
@@ -37,8 +38,15 @@ export function TransactionModal() {
   });
 
   async function handleCreateNewTransaction(data: NewTransactionFormInputs) {
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    console.log(data);
+    const { description, category, price, type } = data;
+
+    await api.post('transactions', {
+      description,
+      price,
+      category,
+      type,
+      createdAt: new Date(), // geralmente é criado pelo back end na vida real
+    })
   }
 
   return (
