@@ -10,10 +10,19 @@ interface Transaction {
   createdAt: string;
 }
 
+// Não reutilixamos o código do NewTransactionFormInputs (zod) pois queremos desacoplar do componente modal;
+interface CreateTransactionInput {
+  description: string;
+  price: number;
+  category: string;
+  type: 'income' | 'outcome';
+}
+
 interface TransactionContextType {
   transactions: Transaction[];
   // assíncrona; Expor funcao para conseguirmos filtrar as transações.
   fetchTransactions: (query?: string) => Promise<void>;
+  createTransaction: (data: CreateTransactionInput) => Promise<void>;
 }
 
 export const TransactionsContext = createContext({} as TransactionContextType);
@@ -40,12 +49,28 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
     const response = await api.get('transactions', {
       params: {
+        _sort: 'createdAt',
+        _order: 'desc',
         q: query,
       }
     })
 
     setTransactions(response.data);
   };
+
+  async function createTransaction(data: CreateTransactionInput) {
+    const { description, category, price, type } = data;
+
+    const response = await api.post('transactions', {
+      description,
+      price,
+      category,
+      type,
+      createdAt: new Date(), // geralmente é criado pelo back end na vida real
+    })
+
+    setTransactions(prevState => [response.data, ...prevState])
+  }
 
   // useEffect não aceita async/await https://www.designcise.com/web/tutorial/why-cant-react-useeffect-callback-be-async
   useEffect(() => {
@@ -56,7 +81,8 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     <TransactionsContext.Provider
       value={{
         transactions,
-        fetchTransactions
+        fetchTransactions,
+        createTransaction
       }}
     >
       {children}

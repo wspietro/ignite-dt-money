@@ -10,8 +10,8 @@ import {
 } from './styles';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod'
-import { api } from '../../lib/axios';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
+import { TransactionsContext } from '../../contexts/TransactionsContext';
 
 
 const newTransactionFormSchema = z.object({
@@ -25,6 +25,8 @@ type NewTransactionFormInputs = z.infer<typeof newTransactionFormSchema>
 
 
 export function TransactionModal() {
+  const { createTransaction } = useContext(TransactionsContext);
+
   const {
     control,
     register,
@@ -39,16 +41,9 @@ export function TransactionModal() {
     }
   });
 
-  async function handleCreateNewTransaction(data: NewTransactionFormInputs) {
-    const { description, category, price, type } = data;
 
-    await api.post('transactions', {
-      description,
-      price,
-      category,
-      type,
-      createdAt: new Date(), // geralmente é criado pelo back end na vida real
-    })
+  async function handleCreateNewTransaction(data: NewTransactionFormInputs) {
+    await createTransaction(data);
   }
 
   useEffect(() => {
