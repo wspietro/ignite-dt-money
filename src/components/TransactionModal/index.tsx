@@ -11,6 +11,7 @@ import {
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod'
 import { api } from '../../lib/axios';
+import { useEffect } from 'react';
 
 
 const newTransactionFormSchema = z.object({
@@ -28,7 +29,8 @@ export function TransactionModal() {
     control,
     register,
     handleSubmit,
-    formState: { isSubmitting }
+    reset,
+    formState: { isSubmitting, isSubmitSuccessful }
   } = useForm<NewTransactionFormInputs>({
     resolver: zodResolver(newTransactionFormSchema),
     // Botao de entrada iniciará clicado. Value do Transaction type;
@@ -48,6 +50,14 @@ export function TransactionModal() {
       createdAt: new Date(), // geralmente é criado pelo back end na vida real
     })
   }
+
+  useEffect(() => {
+    // chamar o reset dentro do submit pode gerar erross no estado do form;
+    // ao chamar dentro de useEffect, garantimos que o formulário foi submetido e os campos remontados, prontos para o reset.
+    if (isSubmitSuccessful) {
+      reset();
+    }
+  }, [isSubmitSuccessful])
 
   return (
     <Dialog.Portal>
